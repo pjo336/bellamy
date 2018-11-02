@@ -76,6 +76,35 @@ func TestParserErrors(t *testing.T) {
 	}
 }
 
+func TestReturnStatement(t *testing.T) {
+	input := `
+	return 5;
+	return 12345;
+	return add(x, y);
+	`
+	numStatements := 3
+	l := lexer.New(input)
+	p := New(l)
+
+	program := p.ParseProgram()
+	checkParserErrors(t, p, false)
+
+	if len(program.Statements) != numStatements {
+		t.Fatalf("program.statements does not contain %d statements, got %d", numStatements, len(program.Statements))
+	}
+
+	for _, stmt := range program.Statements {
+		returnStmt, ok := stmt.(*ast.ReturnStatement)
+		if !ok {
+			t.Errorf("statement is not ReturnStatement, got %T", stmt)
+			continue // why continue
+		}
+		if returnStmt.TokenLiteral() != "return" {
+			t.Errorf("returnStmt token literal not 'return', got %q", returnStmt.TokenLiteral())
+		}
+	}
+}
+
 func checkParserErrors(t *testing.T, p *Parser, expected bool) []string {
 	errors := p.Errors()
 	if expected && len(errors) > 0 {
