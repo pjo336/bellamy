@@ -310,6 +310,55 @@ func TestOperatorPrecedenceParsing(t *testing.T) {
 	}
 }
 
+func TestIfExpression(t *testing.T) {
+	input := "if (x < y) { x };"
+	numStatements := 1
+	l := lexer.New(input)
+	p := New(l)
+	program := p.ParseProgram()
+	checkParserErrors(t, p, false)
+
+	assert.Equal(t, numStatements, len(program.Statements))
+	stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
+	assert.True(t, ok)
+	exp, ok := stmt.Expression.(*ast.IfExpression)
+	assert.True(t, ok)
+	testInfixExpression(t, exp.Condition, "x", "<", "y")
+	assert.Equal(t, numStatements, len(exp.Consequence.Statements))
+	consequence, ok := exp.Consequence.Statements[0].(*ast.ExpressionStatement)
+	assert.True(t, ok)
+	testIdentifier(t, consequence.Expression, "x")
+	assert.Nil(t, exp.Alternative)
+}
+
+func TestIfElseExpression(t *testing.T) {
+	input := `if (x < y) { x } else { y }`
+	numStatements := 1
+	l := lexer.New(input)
+	p := New(l)
+	program := p.ParseProgram()
+	checkParserErrors(t, p, false)
+
+	assert.Equal(t, numStatements, len(program.Statements))
+
+	stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
+	assert.True(t, ok)
+
+	exp, ok := stmt.Expression.(*ast.IfExpression)
+	assert.True(t, ok)
+	testInfixExpression(t, exp.Condition, "x", "<", "y")
+	assert.Equal(t, numStatements, len(exp.Consequence.Statements))
+
+	consequence, ok := exp.Consequence.Statements[0].(*ast.ExpressionStatement)
+	assert.True(t, ok)
+	testIdentifier(t, consequence.Expression, "x")
+	assert.Equal(t, numStatements, len(exp.Alternative.Statements))
+
+	alternative, ok := exp.Alternative.Statements[0].(*ast.ExpressionStatement)
+	assert.True(t, ok)
+	testIdentifier(t, alternative.Expression, "y")
+}
+
 // Helper methods
 
 func testLiteralExpression(t *testing.T, exp ast.Expression, expected interface{}) {
