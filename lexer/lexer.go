@@ -2,6 +2,7 @@ package lexer
 
 import (
 	"bellamy/token"
+	"bellamy/utils"
 )
 
 type Lexer struct {
@@ -68,11 +69,11 @@ func (l *Lexer) NextToken() token.Token {
 	case 0:
 		t = newToken(token.EOF, '0')
 	default:
-		if isLetter(l.ch) {
+		if utils.IsLetter(l.ch) {
 			t.Literal = l.readIdentifier()
 			t.Type = token.LookupIdent(t.Literal)
 			return t
-		} else if isDigit(l.ch) {
+		} else if utils.IsDigit(l.ch) {
 			t.Literal = l.readNumber()
 			t.Type = token.INT
 			return t
@@ -103,7 +104,7 @@ func (l *Lexer) readChar() {
 
 func (l *Lexer) readIdentifier() string {
 	position := l.position
-	for isLetter(l.ch) {
+	for utils.IsLetter(l.ch) {
 		l.readChar()
 	}
 	return l.input[position:l.position]
@@ -111,22 +112,14 @@ func (l *Lexer) readIdentifier() string {
 
 func (l *Lexer) readNumber() string {
 	position := l.position
-	for isDigit(l.ch) {
+	for utils.IsDigit(l.ch) {
 		l.readChar()
 	}
 	return l.input[position:l.position]
 }
 
 func (l *Lexer) skipWhitespace() {
-	for l.ch == ' ' || l.ch == '\t' || l.ch == '\n' || l.ch == '\r' {
-		l.readChar()
+	for utils.IsWhitespace(l.ch) {
+		l.readChar() // advance the token ahead
 	}
-}
-
-func isLetter(ch byte) bool {
-	return 'a' <= ch && ch <= 'z' || 'A' <= ch && ch <= 'Z' || ch == '_'
-}
-
-func isDigit(ch byte) bool {
-	return '0' <= ch && ch <= '9'
 }
