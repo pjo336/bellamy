@@ -1,7 +1,7 @@
 package lexer
 
 import (
-	"Bellamy/token"
+	"bellamy/token"
 )
 
 type Lexer struct {
@@ -106,7 +106,7 @@ func (l *Lexer) readIdentifier() string {
 	for isLetter(l.ch) {
 		l.readChar()
 	}
-	return l.input[position: l.position]
+	return l.input[position:l.position]
 }
 
 func (l *Lexer) readNumber() string {
@@ -114,7 +114,7 @@ func (l *Lexer) readNumber() string {
 	for isDigit(l.ch) {
 		l.readChar()
 	}
-	return l.input[position: l.position]
+	return l.input[position:l.position]
 }
 
 func (l *Lexer) skipWhitespace() {

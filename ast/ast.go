@@ -1,7 +1,7 @@
 package ast
 
 import (
-	"Bellamy/token"
+	"bellamy/token"
 	"bytes"
 )
 
@@ -24,14 +24,14 @@ type Program struct {
 	Statements []Statement
 }
 
-func(p *Program) TokenLiteral() string {
+func (p *Program) TokenLiteral() string {
 	if len(p.Statements) > 0 {
 		return p.Statements[0].TokenLiteral()
 	}
 	return ""
 }
 
-func(p *Program) String() string {
+func (p *Program) String() string {
 	var out bytes.Buffer
 	for _, s := range p.Statements {
 		out.WriteString(s.String())
@@ -41,7 +41,7 @@ func(p *Program) String() string {
 
 type LetStatement struct {
 	Token token.Token
-	Name *Identifier
+	Name  *Identifier
 	Value Expression
 }
 
@@ -80,7 +80,7 @@ func (i *Identifier) String() string {
 }
 
 type ReturnStatement struct {
-	Token token.Token
+	Token       token.Token
 	ReturnValue Expression
 }
 
@@ -103,7 +103,7 @@ func (r *ReturnStatement) String() string {
 }
 
 type ExpressionStatement struct {
-	Token token.Token
+	Token      token.Token
 	Expression Expression
 }
 
@@ -136,9 +136,9 @@ func (il *IntegerLiteral) String() string {
 }
 
 type PrefixExpression struct {
-	Token token.Token
+	Token    token.Token
 	Operator string
-	Right Expression
+	Right    Expression
 }
 
 func (pe *PrefixExpression) expressionNode() {}
@@ -157,10 +157,10 @@ func (pe *PrefixExpression) String() string {
 }
 
 type InfixExpression struct {
-	Token token.Token
-	Left Expression
+	Token    token.Token
+	Left     Expression
 	Operator string
-	Right Expression
+	Right    Expression
 }
 
 func (ie *InfixExpression) expressionNode() {}

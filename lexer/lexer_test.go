@@ -3,7 +3,7 @@ package lexer
 import (
 	"testing"
 
-	"Bellamy/token"
+	"bellamy/token"
 )
 
 func TestNextToken(t *testing.T) {

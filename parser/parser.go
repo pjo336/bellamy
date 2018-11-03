@@ -1,9 +1,9 @@
 package parser
 
 import (
-	"Bellamy/ast"
-	"Bellamy/lexer"
-	"Bellamy/token"
+	"bellamy/ast"
+	"bellamy/lexer"
+	"bellamy/token"
 	"fmt"
 	"strconv"
 )
@@ -11,39 +11,39 @@ import (
 const (
 	_ int = iota
 	LOWEST
-	EQUALS // ==
+	EQUALS      // ==
 	LESSGREATER // > or <
-	SUM // +
-	PRODUCT // *
-	PREFIX // -x or !x
-	CALL // myFn(x)
+	SUM         // +
+	PRODUCT     // *
+	PREFIX      // -x or !x
+	CALL        // myFn(x)
 )
 
 var precedences = map[token.TokenType]int{
-	token.EQ: EQUALS,
-	token.NE: EQUALS,
-	token.LT: LESSGREATER,
-	token.GT: LESSGREATER,
-	token.PLUS: SUM,
-	token.MINUS: SUM,
-	token.SLASH: PRODUCT,
+	token.EQ:       EQUALS,
+	token.NE:       EQUALS,
+	token.LT:       LESSGREATER,
+	token.GT:       LESSGREATER,
+	token.PLUS:     SUM,
+	token.MINUS:    SUM,
+	token.SLASH:    PRODUCT,
 	token.ASTERISK: PRODUCT,
 }
 
 type Parser struct {
-	l *lexer.Lexer
+	l      *lexer.Lexer
 	errors []string
 
-	curToken token.Token
+	curToken  token.Token
 	peekToken token.Token
 
 	prefixParseFns map[token.TokenType]prefixParseFn
-	infixParseFns map[token.TokenType]infixParseFn
+	infixParseFns  map[token.TokenType]infixParseFn
 }
 
 type (
 	prefixParseFn func() ast.Expression
-	infixParseFn func(ast.Expression) ast.Expression
+	infixParseFn  func(ast.Expression) ast.Expression
 )
 
 func New(l *lexer.Lexer) *Parser {
@@ -139,7 +139,7 @@ func (p *Parser) parseExpression(precedence int) ast.Expression {
 	return leftExp
 }
 
-func(p *Parser) parseIdentifier() ast.Expression {
+func (p *Parser) parseIdentifier() ast.Expression {
 	return &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
 }
 
@@ -158,7 +158,7 @@ func (p *Parser) parseIntegerLiteral() ast.Expression {
 
 func (p *Parser) parsePrefixExpression() ast.Expression {
 	expression := &ast.PrefixExpression{
-		Token: p.curToken,
+		Token:    p.curToken,
 		Operator: p.curToken.Literal,
 	}
 
@@ -169,9 +169,9 @@ func (p *Parser) parsePrefixExpression() ast.Expression {
 
 func (p *Parser) parseInfixExpression(left ast.Expression) ast.Expression {
 	expression := &ast.InfixExpression{
-		Token: p.curToken,
+		Token:    p.curToken,
 		Operator: p.curToken.Literal,
-		Left: left,
+		Left:     left,
 	}
 	precedence := p.curPrecedence()
 	p.nextToken()

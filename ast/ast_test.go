@@ -1,7 +1,7 @@
 package ast
 
 import (
-	"Bellamy/token"
+	"bellamy/token"
 	"testing"
 )
 

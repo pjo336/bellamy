@@ -1,8 +1,8 @@
 package repl
 
 import (
-	"Bellamy/lexer"
-	"Bellamy/token"
+	"bellamy/lexer"
+	"bellamy/token"
 	"bufio"
 	"fmt"
 	"io"

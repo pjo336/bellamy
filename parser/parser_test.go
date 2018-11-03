@@ -1,8 +1,8 @@
 package parser
 
 import (
-	"Bellamy/ast"
-	"Bellamy/lexer"
+	"bellamy/ast"
+	"bellamy/lexer"
 	"fmt"
 	"testing"
 )
@@ -14,7 +14,7 @@ func TestLetStatement(t *testing.T) {
 	let foobar = 1234;
 	`
 	numStatements := 3
-	l:= lexer.New(input)
+	l := lexer.New(input)
 	p := New(l)
 
 	program := p.ParseProgram()
@@ -66,7 +66,7 @@ func TestParserErrors(t *testing.T) {
 	input := `
 	let x 5;
 	`
-	l:= lexer.New(input)
+	l := lexer.New(input)
 	p := New(l)
 
 	p.ParseProgram()
@@ -163,8 +163,8 @@ func TestIntegerLiteralExpressions(t *testing.T) {
 
 func TestParsingPrefixExpression(t *testing.T) {
 	prefixTests := []struct {
-		input string
-		operator string
+		input        string
+		operator     string
 		integerValue int64
 	}{
 		{"!5", "!", 5},
@@ -200,9 +200,9 @@ func TestParsingPrefixExpression(t *testing.T) {
 
 func TestParsingInfixExpression(t *testing.T) {
 	infixTests := []struct {
-		input string
-		leftValue int64
-		operator string
+		input      string
+		leftValue  int64
+		operator   string
 		rightValue int64
 	}{
 		{"5 + 5;", 5, "+", 5},
