@@ -1,4 +1,4 @@
-package main
+package monkey
 
 import (
 	"Bellamy/repl"
