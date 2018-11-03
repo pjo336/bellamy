@@ -1,6 +1,7 @@
 package lexer
 
 import (
+	"github.com/stretchr/testify/assert"
 	"testing"
 
 	"bellamy/token"
@@ -115,14 +116,10 @@ func TestNextToken(t *testing.T) {
 	}
 
 	l := New(input)
-	for i, tt := range tests {
+	for _, tt := range tests {
 		tok := l.NextToken()
-		if tok.Type != tt.expectedType {
-			t.Fatalf("tests[%d] - expected token type %q but got %q", i, tt.expectedType, tok.Type)
-		}
-		if tok.Literal != tt.expectedLiteral {
-			t.Fatalf("tests[%d] - expected token literal %q but got %q", i, tt.expectedLiteral, tok.Literal)
-		}
+		assert.Equal(t, tt.expectedType, tok.Type)
+		assert.Equal(t, tt.expectedLiteral, tok.Literal)
 	}
 
 }
