@@ -28,46 +28,44 @@ func (l *Lexer) NextToken() token.Token {
 		if l.peekChar() == '=' {
 			ch := l.ch
 			l.readChar()
-			literal := string(ch) + string(l.ch)
-			t = token.Token{Type: token.EQ, Literal: literal}
+			t = token.FromMultiChar(token.EQ, []byte{ch, l.ch})
 		} else {
-			t = newToken(token.ASSIGN, l.ch)
+			t = token.FromChar(token.ASSIGN, l.ch)
 		}
 	case ';':
-		t = newToken(token.SEMICOLON, l.ch)
+		t = token.FromChar(token.SEMICOLON, l.ch)
 	case ',':
-		t = newToken(token.COMMA, l.ch)
+		t = token.FromChar(token.COMMA, l.ch)
 	case '(':
-		t = newToken(token.LPAREN, l.ch)
+		t = token.FromChar(token.LPAREN, l.ch)
 	case ')':
-		t = newToken(token.RPAREN, l.ch)
+		t = token.FromChar(token.RPAREN, l.ch)
 	case '{':
-		t = newToken(token.LBRACE, l.ch)
+		t = token.FromChar(token.LBRACE, l.ch)
 	case '}':
-		t = newToken(token.RBRACE, l.ch)
+		t = token.FromChar(token.RBRACE, l.ch)
 	case '+':
-		t = newToken(token.PLUS, l.ch)
+		t = token.FromChar(token.PLUS, l.ch)
 	case '-':
-		t = newToken(token.MINUS, l.ch)
+		t = token.FromChar(token.MINUS, l.ch)
 	case '<':
-		t = newToken(token.LT, l.ch)
+		t = token.FromChar(token.LT, l.ch)
 	case '>':
-		t = newToken(token.GT, l.ch)
+		t = token.FromChar(token.GT, l.ch)
 	case '!':
 		if l.peekChar() == '=' {
 			ch := l.ch
 			l.readChar()
-			literal := string(ch) + string(l.ch)
-			t = token.Token{Type: token.NE, Literal: literal}
+			t = token.FromMultiChar(token.NE, []byte{ch, l.ch})
 		} else {
-			t = newToken(token.BANG, l.ch)
+			t = token.FromChar(token.BANG, l.ch)
 		}
 	case '*':
-		t = newToken(token.ASTERISK, l.ch)
+		t = token.FromChar(token.ASTERISK, l.ch)
 	case '/':
-		t = newToken(token.SLASH, l.ch)
+		t = token.FromChar(token.SLASH, l.ch)
 	case 0:
-		t = newToken(token.EOF, '0')
+		t = token.FromChar(token.EOF, '0')
 	default:
 		if utils.IsLetter(l.ch) {
 			t.Literal = l.readIdentifier()
@@ -78,15 +76,11 @@ func (l *Lexer) NextToken() token.Token {
 			t.Type = token.INT
 			return t
 		} else {
-			t = newToken(token.ILLEGAL, l.ch)
+			t = token.FromChar(token.ILLEGAL, l.ch)
 		}
 	}
 	l.readChar()
 	return t
-}
-
-func newToken(tokenType token.TokenType, ch byte) token.Token {
-	return token.Token{Type: tokenType, Literal: string(ch)}
 }
 
 func (l *Lexer) peekChar() byte {
