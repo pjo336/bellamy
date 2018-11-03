@@ -1,6 +1,7 @@
 package repl
 
 import (
+	"bellamy/evaluator"
 	"bellamy/lexer"
 	"bellamy/parser"
 	"bufio"
@@ -8,7 +9,7 @@ import (
 	"io"
 )
 
-func StartParseRepl(in io.Reader, out io.Writer) {
+func StartEvalRepl(in io.Reader, out io.Writer) {
 	scanner := bufio.NewScanner(in)
 
 	for {
@@ -26,13 +27,10 @@ func StartParseRepl(in io.Reader, out io.Writer) {
 			continue
 		}
 
-		io.WriteString(out, program.String())
-		io.WriteString(out, "\n")
-	}
-}
-
-func printParserErrors(out io.Writer, errors []string) {
-	for _, msg := range errors {
-		io.WriteString(out, "\t" + msg + "\n")
+		evaluated := evaluator.Eval(program)
+		if evaluated != nil {
+			io.WriteString(out, evaluated.Inspect())
+			io.WriteString(out, "\n")
+		}
 	}
 }
