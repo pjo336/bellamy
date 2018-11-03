@@ -25,16 +25,26 @@ func TestLetStatement(t *testing.T) {
 	assert.Equal(t, numStatements, len(program.Statements), "program.Statements does not contain %d statements. got %d statements", numStatements, len(program.Statements))
 
 	tests := []struct {
+		input string
 		expectedIdentifier string
+		expectedValue interface{}
 	}{
-		{"x"},
-		{"y"},
-		{"foobar"},
+		{"let x = 5;", "x", 5},
+		{"let y = true;", "y", true},
+		{"let foobar = abc", "foobar", "abc"},
 	}
 
-	for i, tt := range tests {
-		stmt := program.Statements[i]
+	for _, tt := range tests {
+		l := lexer.New(tt.input)
+		p := New(l)
+		program := p.ParseProgram()
+		checkParserErrors(t, p, false)
+
+		assert.Equal(t, 1, len(program.Statements))
+		stmt := program.Statements[0]
 		testLetStatement(t, stmt, tt.expectedIdentifier)
+		val := stmt.(*ast.LetStatement).Value
+		testLiteralExpression(t, val, tt.expectedValue)
 	}
 }
 
@@ -58,25 +68,29 @@ func TestParserErrors(t *testing.T) {
 	assert.Equal(t, "expected next token to be =, got INT", es[0])
 }
 
-func TestReturnStatement(t *testing.T) {
-	input := `
-	return 5;
-	return 12345;
-	return add(x, y);
-	`
-	numStatements := 3
-	l := lexer.New(input)
-	p := New(l)
+func TestReturnStatements(t *testing.T) {
+	tests := []struct {
+		input         string
+		expectedValue interface{}
+	}{
+		{"return 5;", 5},
+		{"return true;", true},
+		{"return foobar;", "foobar"},
+	}
 
-	program := p.ParseProgram()
-	checkParserErrors(t, p, false)
+	for _, tt := range tests {
+		l := lexer.New(tt.input)
+		p := New(l)
+		program := p.ParseProgram()
+		checkParserErrors(t, p, false)
 
-	assert.Equal(t, numStatements, len(program.Statements))
+		assert.Equal(t, 1, len(program.Statements))
 
-	for _, stmt := range program.Statements {
+		stmt := program.Statements[0]
 		returnStmt, ok := stmt.(*ast.ReturnStatement)
-		assert.True(t, ok, "statement is not ReturnStatement, got %T", stmt)
+		assert.True(t, ok)
 		assert.Equal(t, "return", returnStmt.TokenLiteral())
+		testLiteralExpression(t, returnStmt.ReturnValue, tt.expectedValue)
 	}
 }
 
