@@ -9,8 +9,8 @@ import (
 )
 
 func TestEvalIntegerExpression(t *testing.T) {
-	tests := []struct{
-		input string
+	tests := []struct {
+		input    string
 		expected int64
 	}{
 		{"5", 5},
@@ -37,8 +37,8 @@ func TestEvalIntegerExpression(t *testing.T) {
 }
 
 func TestEvalBooleanExpression(t *testing.T) {
-	tests := []struct{
-		input string
+	tests := []struct {
+		input    string
 		expected bool
 	}{
 		{"true", true},
@@ -69,8 +69,8 @@ func TestEvalBooleanExpression(t *testing.T) {
 }
 
 func TestBangOperator(t *testing.T) {
-	tests := []struct{
-		input string
+	tests := []struct {
+		input    string
 		expected bool
 	}{
 		{"!true", false},
@@ -89,7 +89,7 @@ func TestBangOperator(t *testing.T) {
 
 func TestIfElseExpressions(t *testing.T) {
 	tests := []struct {
-		input string
+		input    string
 		expected interface{}
 	}{
 		{"if (true) { 10 }", 10},
@@ -187,26 +187,33 @@ if (10 > 1) {
 `,
 			"unknown operator: BOOLEAN + BOOLEAN",
 		},
-		//{
-		//	"foobar",
-		//	"identifier not found: foobar",
-		//},
+		{
+			"foobar",
+			"identifier not found: foobar",
+		},
 	}
 
 	for _, tt := range tests {
 		evaluated := testEval(tt.input)
-		t.Log(evaluated)
 		errObj, ok := evaluated.(*object.Error)
-		if !ok {
-			t.Errorf("no error object returned. got=%T(%+v)",
-				evaluated, evaluated)
-			continue
-		}
+		assert.True(t, ok)
+		assert.Equal(t, tt.expectedMessage, errObj.Message)
+	}
+}
 
-		if errObj.Message != tt.expectedMessage {
-			t.Errorf("wrong error message. expected=%q, got=%q",
-				tt.expectedMessage, errObj.Message)
-		}
+func TestLetStatements(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected int64
+	}{
+		{"let a = 5; a;", 5},
+		{"let a = 5 * 5; a;", 25},
+		{"let a = 5; let b = a; b;", 5},
+		{"let a = 5; let b = a; let c = a + b + 5; c;", 15},
+	}
+
+	for _, tt := range tests {
+		testIntegerObject(t, testEval(tt.input), tt.expected)
 	}
 }
 
@@ -218,8 +225,9 @@ func testEval(input string) object.Object {
 	l := lexer.New(input)
 	p := parser.New(l)
 	program := p.ParseProgram()
+	env := object.NewEnvironment()
 
-	return Eval(program)
+	return Eval(program, env)
 }
 
 func testBooleanObject(t *testing.T, o object.Object, expected bool) {

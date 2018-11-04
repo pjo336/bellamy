@@ -5,14 +5,14 @@ import (
 	"bellamy/object"
 )
 
-func Eval(node ast.Node) object.Object {
+func Eval(node ast.Node, env *object.Environment) object.Object {
 	switch node := node.(type) {
 	case *ast.Program:
-		return evalProgram(node)
+		return evalProgram(node, env)
 	case *ast.ExpressionStatement:
-		return Eval(node.Expression)
+		return Eval(node.Expression, env)
 	case *ast.ReturnStatement:
-		val := Eval(node.ReturnValue)
+		val := Eval(node.ReturnValue, env)
 		if isError(val) {
 			return val
 		}
@@ -22,25 +22,33 @@ func Eval(node ast.Node) object.Object {
 	case *ast.Boolean:
 		return booleanObject(node.Value)
 	case *ast.PrefixExpression:
-		right := Eval(node.Right)
+		right := Eval(node.Right, env)
 		if isError(right) {
 			return right
 		}
 		return evalPrefixExpression(node.Operator, right)
 	case *ast.InfixExpression:
-		left := Eval(node.Left)
+		left := Eval(node.Left, env)
 		if isError(left) {
 			return left
 		}
-		right := Eval(node.Right)
+		right := Eval(node.Right, env)
 		if isError(right) {
 			return right
 		}
 		return evalInfixExpression(node.Operator, left, right)
 	case *ast.BlockStatement:
-		return evalBlockStatement(node)
+		return evalBlockStatement(node, env)
 	case *ast.IfExpression:
-		return evalIfExpression(node)
+		return evalIfExpression(node, env)
+	case *ast.LetStatement:
+		val := Eval(node.Value, env)
+		if isError(val) {
+			return val
+		}
+		return env.Set(node.Name.Value, val)
+	case *ast.Identifier:
+		return evalIdentifier(node, env)
 	default:
 		return object.NULL
 	}
@@ -53,10 +61,10 @@ func isError(o object.Object) bool {
 	return false
 }
 
-func evalProgram(program *ast.Program) object.Object {
+func evalProgram(program *ast.Program, env *object.Environment) object.Object {
 	var result object.Object
 	for _, stmt := range program.Statements {
-		result = Eval(stmt)
+		result = Eval(stmt, env)
 		switch result := result.(type) {
 		case *object.ReturnValue:
 			return result.Value
@@ -67,10 +75,10 @@ func evalProgram(program *ast.Program) object.Object {
 	return result
 }
 
-func evalBlockStatement(block *ast.BlockStatement) object.Object {
+func evalBlockStatement(block *ast.BlockStatement, env *object.Environment) object.Object {
 	var result object.Object
 	for _, stmt := range block.Statements {
-		result = Eval(stmt)
+		result = Eval(stmt, env)
 		if result != nil {
 			rt := result.Type()
 			if rt == object.RETURN_VALUE_OBJ || rt == object.ERROR_OBJ {
@@ -81,15 +89,23 @@ func evalBlockStatement(block *ast.BlockStatement) object.Object {
 	return result
 }
 
-func evalIfExpression(ie *ast.IfExpression) object.Object {
-	cond := Eval(ie.Condition)
+func evalIdentifier(ident *ast.Identifier, env *object.Environment) object.Object {
+	val, ok := env.Get(ident.Value)
+	if !ok {
+		return object.NewError("identifier not found: " + ident.Value)
+	}
+	return val
+}
+
+func evalIfExpression(ie *ast.IfExpression, env *object.Environment) object.Object {
+	cond := Eval(ie.Condition, env)
 	if isError(cond) {
 		return cond
 	}
 	if isTruthy(cond) {
-		return Eval(ie.Consequence)
+		return Eval(ie.Consequence, env)
 	} else if ie.Alternative != nil {
-		return Eval(ie.Alternative)
+		return Eval(ie.Alternative, env)
 	}
 	//return object.NewError("uknown operator:")
 	return object.NULL
