@@ -101,12 +101,9 @@ func TestIfElseExpressions(t *testing.T) {
 		{"if (1 < 2) { 10 } else { 20 }", 10},
 	}
 
-	for i, tt := range tests {
+	for _, tt := range tests {
 		evaluated := testEval(tt.input)
-		t.Logf("running %d", i)
 		i, ok := tt.expected.(int)
-		t.Log(ok)
-		t.Log(evaluated)
 		if ok {
 			testIntegerObject(t, evaluated, int64(i))
 		} else {
@@ -142,6 +139,74 @@ if (10 > 1) {
 	for _, tt := range tests {
 		evaluated := testEval(tt.input)
 		testIntegerObject(t, evaluated, tt.expected)
+	}
+}
+
+func TestErrorHandling(t *testing.T) {
+	tests := []struct {
+		input           string
+		expectedMessage string
+	}{
+		{
+			"5 + true;",
+			"type mismatch: INTEGER + BOOLEAN",
+		},
+		{
+			"5 + true; 5;",
+			"type mismatch: INTEGER + BOOLEAN",
+		},
+		{
+			"-true",
+			"unknown operator: -BOOLEAN",
+		},
+		{
+			"true + false;",
+			"unknown operator: BOOLEAN + BOOLEAN",
+		},
+		{
+			"true + false + true;",
+			"unknown operator: BOOLEAN + BOOLEAN",
+		},
+		{
+			"5; true + false; 5",
+			"unknown operator: BOOLEAN + BOOLEAN",
+		},
+		{
+			"if (10 > 1) { true + false; }",
+			"unknown operator: BOOLEAN + BOOLEAN",
+		},
+		{
+			`
+if (10 > 1) {
+ if (10 > 1) {
+   return true + false;
+ }
+
+ return 1;
+}
+`,
+			"unknown operator: BOOLEAN + BOOLEAN",
+		},
+		//{
+		//	"foobar",
+		//	"identifier not found: foobar",
+		//},
+	}
+
+	for _, tt := range tests {
+		evaluated := testEval(tt.input)
+		t.Log(evaluated)
+		errObj, ok := evaluated.(*object.Error)
+		if !ok {
+			t.Errorf("no error object returned. got=%T(%+v)",
+				evaluated, evaluated)
+			continue
+		}
+
+		if errObj.Message != tt.expectedMessage {
+			t.Errorf("wrong error message. expected=%q, got=%q",
+				tt.expectedMessage, errObj.Message)
+		}
 	}
 }
 
