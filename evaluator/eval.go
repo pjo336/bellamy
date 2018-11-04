@@ -8,7 +8,7 @@ import (
 func Eval(node ast.Node) object.Object {
 	switch node := node.(type) {
 	case *ast.Program:
-		return evalStatement(node.Statements)
+		return evalStatements(node.Statements)
 	case *ast.ExpressionStatement:
 		return Eval(node.Expression)
 	case *ast.IntegerLiteral:
@@ -22,17 +22,44 @@ func Eval(node ast.Node) object.Object {
 		left := Eval(node.Left)
 		right := Eval(node.Right)
 		return evalInfixExpression(node.Operator, left, right)
+	case *ast.BlockStatement:
+		return evalStatements(node.Statements)
+	case *ast.IfExpression:
+		return evalIfExpression(node)
 	default:
 		return object.NULL
 	}
 }
 
-func evalStatement(statements []ast.Statement) object.Object {
+func evalStatements(statements []ast.Statement) object.Object {
 	var result object.Object
 	for _, stmt := range statements {
 		result = Eval(stmt)
 	}
 	return result
+}
+
+func evalIfExpression(ie *ast.IfExpression) object.Object {
+	cond := Eval(ie.Condition)
+	if isTruthy(cond) {
+		return Eval(ie.Consequence)
+	} else if ie.Alternative != nil {
+		return Eval(ie.Alternative)
+	}
+	return object.NULL
+}
+
+func isTruthy(o object.Object) bool {
+	switch o {
+	case object.NULL:
+		return false
+	case object.TRUE:
+		return true
+	case object.FALSE:
+		return false
+	default:
+		return true
+	}
 }
 
 func evalPrefixExpression(op string, right object.Object) object.Object {
