@@ -51,6 +51,12 @@ func TestEvalStringExpression(t *testing.T) {
 	}
 }
 
+func TestStringConcat(t *testing.T) {
+	input := `"hello" + " " + "world!"`
+	evaluated := testEval(input)
+	testStringObject(t, evaluated, "hello world!")
+}
+
 func TestEvalBooleanExpression(t *testing.T) {
 	tests := []struct {
 		input    string
@@ -208,6 +214,10 @@ func TestErrorHandling(t *testing.T) {
 		{
 			"if (10 > 1) { true + false; }",
 			"unknown operator: BOOLEAN + BOOLEAN",
+		},
+		{
+			`"hello" - "world"`,
+			"unknown operator: STRING - STRING",
 		},
 		{
 			`
