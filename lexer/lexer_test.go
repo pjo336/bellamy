@@ -1,8 +1,9 @@
 package lexer
 
 import (
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 
 	"bellamy/token"
 )
@@ -16,19 +17,20 @@ func TestNextToken(t *testing.T) {
 	  x + y;
 	};
 	let result = add(five, ten);
-	
+
 	5 - 5;
-	
+
 	if (5 < 10) {
 	  return true;
 	} else {
 	  return false;
 	}
-	
+
 	10 == 10;
 	5 != 10;
 	"foobar";
 	"foo bar";
+	[1, 2, 3];
 	`
 
 	tests := []struct {
@@ -118,6 +120,15 @@ func TestNextToken(t *testing.T) {
 		{token.STRING, "foobar"},
 		{token.SEMICOLON, ";"},
 		{token.STRING, "foo bar"},
+		{token.SEMICOLON, ";"},
+
+		{token.LBRACKET, "["},
+		{token.INT, "1"},
+		{token.COMMA, ","},
+		{token.INT, "2"},
+		{token.COMMA, ","},
+		{token.INT, "3"},
+		{token.RBRACKET, "]"},
 		{token.SEMICOLON, ";"},
 
 		{token.EOF, "0"},
