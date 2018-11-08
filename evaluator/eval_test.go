@@ -318,6 +318,33 @@ addTwo(2);`
 	testIntegerObject(t, testEval(input), 4)
 }
 
+func TestBuiltinFunctions(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{`len("")`, 0},
+		{`len("abc")`, 3},
+		{`len("abc" + "def" )`, 6},
+		{`len("abc" + " " )`, 4},
+		{`len(1)`, "argument to `len` not supported, got INTEGER"},
+		{`len("a", "b")`, "wrong number of arguments. got 2, expected 1"},
+	}
+
+	for _, tt := range tests {
+		evaluated := testEval(tt.input)
+
+		switch expected := tt.expected.(type) {
+		case int:
+			testIntegerObject(t, evaluated, int64(expected))
+		case string:
+			errObj, ok := evaluated.(*object.Error)
+			assert.True(t, ok)
+			assert.Equal(t, expected, errObj.Message)
+		}
+	}
+}
+
 func testNullObject(t *testing.T, o object.Object) {
 	assert.Equal(t, object.NULL, o)
 }
