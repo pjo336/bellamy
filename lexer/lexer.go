@@ -64,6 +64,9 @@ func (l *Lexer) NextToken() token.Token {
 		t = token.FromChar(token.ASTERISK, l.ch)
 	case '/':
 		t = token.FromChar(token.SLASH, l.ch)
+	case '"':
+		t.Type = token.STRING
+		t.Literal = l.readString()
 	case 0:
 		t = token.FromChar(token.EOF, '0')
 	default:
@@ -94,6 +97,16 @@ func (l *Lexer) readChar() {
 	l.ch = l.peekChar()
 	l.position = l.readPosition
 	l.readPosition += 1
+}
+
+func (l *Lexer) readString() string {
+	b := []byte{}
+	l.readChar()
+	for l.ch != '"' && l.ch != '0' {
+		b = append(b, l.ch)
+		l.readChar()
+	}
+	return string(b)
 }
 
 func (l *Lexer) readIdentifier() string {

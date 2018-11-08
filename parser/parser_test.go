@@ -4,8 +4,9 @@ import (
 	"bellamy/ast"
 	"bellamy/lexer"
 	"fmt"
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestLetStatement(t *testing.T) {
@@ -25,9 +26,9 @@ func TestLetStatement(t *testing.T) {
 	assert.Equal(t, numStatements, len(program.Statements), "program.Statements does not contain %d statements. got %d statements", numStatements, len(program.Statements))
 
 	tests := []struct {
-		input string
+		input              string
 		expectedIdentifier string
-		expectedValue interface{}
+		expectedValue      interface{}
 	}{
 		{"let x = 5;", "x", 5},
 		{"let y = true;", "y", true},
@@ -147,6 +148,25 @@ func TestIntegerLiteralExpressions(t *testing.T) {
 	assert.True(t, ok, "exp not IntegerLiteral, got %T", stmt.Expression)
 	assert.Equal(t, int64(5), literal.Value)
 	assert.Equal(t, "5", literal.TokenLiteral())
+}
+
+func TestStringLiteralExpressions(t *testing.T) {
+	input := `"this is a string!"`
+	numStatements := 1
+	l := lexer.New(input)
+	p := New(l)
+	program := p.ParseProgram()
+	checkParserErrors(t, p, false)
+
+	assert.Equal(t, numStatements, len(program.Statements))
+
+	stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
+	assert.True(t, ok, "program.Statements[0] is not expression statement, got %T", program.Statements[0])
+
+	literal, ok := stmt.Expression.(*ast.StringLiteral)
+	assert.True(t, ok, "exp not StringLiteral, got %T", stmt.Expression)
+	assert.Equal(t, "this is a string!", literal.Value)
+	assert.Equal(t, "this is a string!", literal.TokenLiteral())
 }
 
 func TestParsingPrefixExpression(t *testing.T) {
@@ -465,7 +485,7 @@ func TestCallExpressionParsing(t *testing.T) {
 // Helper methods
 
 func testLiteralExpression(t *testing.T, exp ast.Expression, expected interface{}) {
-	switch v:= expected.(type) {
+	switch v := expected.(type) {
 	case int:
 		testIntegerLiteral(t, exp, int64(v))
 	case int64:

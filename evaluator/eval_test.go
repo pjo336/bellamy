@@ -4,8 +4,9 @@ import (
 	"bellamy/lexer"
 	"bellamy/object"
 	"bellamy/parser"
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestEvalIntegerExpression(t *testing.T) {
@@ -33,6 +34,20 @@ func TestEvalIntegerExpression(t *testing.T) {
 	for _, tt := range tests {
 		evaluated := testEval(tt.input)
 		testIntegerObject(t, evaluated, tt.expected)
+	}
+}
+
+func TestEvalStringExpression(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected string
+	}{
+		{`"yo dawg, i heard you liked strings"`, "yo dawg, i heard you liked strings"},
+	}
+
+	for _, tt := range tests {
+		evaluated := testEval(tt.input)
+		testStringObject(t, evaluated, tt.expected)
 	}
 }
 
@@ -308,12 +323,20 @@ func testEval(input string) object.Object {
 
 func testBooleanObject(t *testing.T, o object.Object, expected bool) {
 	result, ok := o.(*object.Boolean)
-	assert.True(t, ok)
-	assert.Equal(t, expected, result.Value)
+	assertObjectValue(t, ok, result.Value, expected)
 }
 
 func testIntegerObject(t *testing.T, o object.Object, expected int64) {
 	result, ok := o.(*object.Integer)
+	assertObjectValue(t, ok, result.Value, expected)
+}
+
+func testStringObject(t *testing.T, o object.Object, expected string) {
+	result, ok := o.(*object.String)
+	assertObjectValue(t, ok, result.Value, expected)
+}
+
+func assertObjectValue(t *testing.T, ok bool, val interface{}, expected interface{}) {
 	assert.True(t, ok)
-	assert.Equal(t, expected, result.Value)
+	assert.Equal(t, expected, val)
 }
