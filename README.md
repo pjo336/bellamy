@@ -4,3 +4,9 @@ Source code for the Bellamy programming language
 
 Stuff for the future:
 https://www.youtube.com/watch?v=ecIWPzGEbFc
+
+
+Needed List:
+1. Non static functions (map on array, etc)
+2. Interpret file
+3. Import system
