@@ -2,14 +2,23 @@ package evaluator
 
 import (
 	"bellamy/object"
+	"fmt"
 )
 
 var builtins = map[string]*object.Builtin{
+	"puts":  &object.Builtin{Fn: puts},
 	"len":   &object.Builtin{Fn: length},
 	"first": &object.Builtin{Fn: first},
 	"last":  &object.Builtin{Fn: last},
 	"tail":  &object.Builtin{Fn: tail},
 	"push":  &object.Builtin{Fn: push},
+}
+
+func puts(args ...object.Object) object.Object {
+	for _, arg := range args {
+		fmt.Println(arg.Inspect())
+	}
+	return object.NULL
 }
 
 func length(args ...object.Object) object.Object {
