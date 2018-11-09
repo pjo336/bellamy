@@ -2,9 +2,11 @@ package evaluator
 
 import (
 	"bellamy/ast"
+	"bellamy/builtins/static"
 	"bellamy/object"
 )
 
+// Eval has the main task of interpreting each node that it comes across in our parsed source code
 func Eval(node ast.Node, env *object.Environment) object.Object {
 	switch node := node.(type) {
 	case *ast.Program:
@@ -205,7 +207,7 @@ func evalIdentifier(ident *ast.Identifier, env *object.Environment) object.Objec
 		return val
 	}
 
-	if builtin, ok := builtins[ident.Value]; ok {
+	if builtin, ok := static.StaticBuiltins[ident.Value]; ok {
 		return builtin
 	}
 
