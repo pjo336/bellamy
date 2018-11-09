@@ -466,6 +466,31 @@ func TestIndexExpressions(t *testing.T) {
 	testInfixExpression(t, indexExp.Index, 1, "+", 1)
 }
 
+func TestHashLiteralsStringKeys(t *testing.T) {
+	input := `{"one": 1, "two": 2 }`
+	program := setupTest(t, input)
+	stmt := program.Statements[0].(*ast.ExpressionStatement)
+	hash, ok := stmt.Expression.(*ast.HashLiteral)
+	assert.True(t, ok)
+	assert.Equal(t, 2, len(hash.Pairs))
+	expected := map[string]int64{"one": 1, "two": 2}
+	for k, v := range hash.Pairs {
+		literal, ok := k.(*ast.StringLiteral)
+		assert.True(t, ok)
+		expectedVal := expected[literal.String()]
+		testIntegerLiteral(t, v, expectedVal)
+	}
+}
+
+func TestEmptyHashLiteral(t *testing.T) {
+	input := "{}"
+	program := setupTest(t, input)
+	stmt := program.Statements[0].(*ast.ExpressionStatement)
+	hash, ok := stmt.Expression.(*ast.HashLiteral)
+	assert.True(t, ok)
+	assert.Equal(t, 0, len(hash.Pairs))
+}
+
 // Helper methods
 
 func setupTest(t *testing.T, input string) *ast.Program {
