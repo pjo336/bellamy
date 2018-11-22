@@ -74,6 +74,8 @@ func (l *Lexer) NextToken() token.Token {
 	case '"':
 		t.Type = token.STRING
 		t.Literal = l.readString()
+	case '.':
+		t = token.FromChar(token.PERIOD, l.ch)
 	case 0:
 		t = token.FromChar(token.EOF, '0')
 	default:
