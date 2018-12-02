@@ -4,10 +4,12 @@ import (
 	"bellamy/ast"
 	"bellamy/builtins/static"
 	"bellamy/object"
+	"fmt"
 )
 
 // Eval has the main task of interpreting each node that it comes across in our parsed source code
 func Eval(node ast.Node, env *object.Environment) object.Object {
+	fmt.Printf("%T\n", node)
 	switch node := node.(type) {
 	case *ast.Program:
 		return evalProgram(node, env)
@@ -68,6 +70,14 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 		}
 		// Make the magic happen!
 		return applyFunction(function, args)
+	case *ast.InvokeExpression:
+		env.Set(node.Subject.String())
+		function := Eval(node.CallExpression.Function, env)
+		fmt.Println(function)
+		if isError(function) {
+			return function
+		}
+		return nil
 	case *ast.ArrayLiteral:
 		elements := evalExpressions(node.Elements, env)
 		if len(elements) == 1 && isError(elements[0]) {
@@ -203,6 +213,7 @@ func unwrapReturnValue(o object.Object) object.Object {
 }
 
 func evalIdentifier(ident *ast.Identifier, env *object.Environment) object.Object {
+	fmt.Println(ident)
 	if val, ok := env.Get(ident.Value); ok {
 		return val
 	}

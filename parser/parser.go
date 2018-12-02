@@ -50,6 +50,7 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerInfix(token.NE, p.parseInfixExpression)
 	p.registerInfix(token.LT, p.parseInfixExpression)
 	p.registerInfix(token.GT, p.parseInfixExpression)
+	p.registerInfix(token.PERIOD, p.parseDotAccess)
 	p.registerInfix(token.LPAREN, p.parseCallExpression)
 	p.registerInfix(token.LBRACKET, p.parseIndexExpression)
 
@@ -91,6 +92,7 @@ func (p *Parser) ParseProgram() *ast.Program {
 }
 
 func (p *Parser) parseStatement() ast.Statement {
+	fmt.Println("PARSING!")
 	switch p.curToken.Type {
 	case token.LET:
 		return p.parseLetStatement()
@@ -107,6 +109,7 @@ func (p *Parser) parseExpressionStatement() *ast.ExpressionStatement {
 	if p.peekTokenIs(token.SEMICOLON) {
 		p.nextToken()
 	}
+	fmt.Println(stmt.Expression.String())
 	return stmt
 }
 
@@ -209,6 +212,22 @@ func (p *Parser) parseFunctionParameters() []*ast.Identifier {
 	}
 
 	return args
+}
+
+func (p *Parser) parseDotAccess(left ast.Expression) ast.Expression {
+	exp := &ast.InvokeExpression{Token: p.curToken, Subject: left}
+
+	p.nextToken()
+
+	function := p.parseIdentifier()
+
+	p.nextToken()
+
+	call := &ast.CallExpression{Token: p.curToken, Function: function}
+	call.Arguments = p.parseExpressionList(token.RPAREN)
+	exp.CallExpression = call
+
+	return exp
 }
 
 func (p *Parser) parseCallExpression(function ast.Expression) ast.Expression {
