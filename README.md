@@ -8,5 +8,5 @@ https://www.youtube.com/watch?v=ecIWPzGEbFc
 
 Needed List:
 1. Non static functions (map on array, etc)
-2. Interpret file
+2. Interpret life
 3. Import system
